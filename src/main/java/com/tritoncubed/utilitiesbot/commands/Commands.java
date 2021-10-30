@@ -112,7 +112,7 @@ public final class Commands {
             Class<?> paramType = params[i].getType();
             OptionType optionType = Commands.getOptionType(paramType);
 
-            optionData[i - 1] = new OptionData(optionType, a.name(), a.description());
+            optionData[i - 1] = new OptionData(optionType, a.name(), a.description(), a.required());
         }
 
         return optionData;
