@@ -1,6 +1,5 @@
 package com.tritoncubed.utilitiesbot;
 
-import com.tritoncubed.utilitiesbot.commands.AWSCommands;
 import com.tritoncubed.utilitiesbot.commands.Commands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -9,7 +8,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Properties;
 
 public class Main {
