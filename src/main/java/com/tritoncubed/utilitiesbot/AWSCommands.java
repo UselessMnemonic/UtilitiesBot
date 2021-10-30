@@ -14,12 +14,12 @@ public class AWSCommands implements ApplicationCommand {
 
     @Subcommand(name="status", description="Get status of an EBS instance.", group="ebs")
     public static void status(
-            SlashCommandEvent event,
+        SlashCommandEvent event,
 
-            @CommandOption(name="instance", description="Name of the EBS instance.")
-            String instance
-    ) {
-        event.reply("Thank you!").setEphemeral(event.isFromGuild()).queue();
+        @CommandOption(name="instance", description="Name of the EBS instance.")
+        String instance
+    ){
+        event.reply("Thank you: %s!".formatted(instance)).setEphemeral(event.isFromGuild()).queue();
     }
 
 }

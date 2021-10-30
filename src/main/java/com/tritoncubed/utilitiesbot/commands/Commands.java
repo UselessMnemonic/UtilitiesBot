@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class Commands {
     public static void registerCommands(Class<? extends ApplicationCommand> commandClass, JDA jda) {
@@ -33,21 +35,30 @@ public final class Commands {
         List<OptionMapping> options = event.getOptions();
         Parameter[] params = method.getParameters();
 
-        Object[] args = new Object[options.size()];
-        for (int i = 1; i < options.size(); i++) {
-            args[i] = castOptionAsType(params[i].getType(), options.get(i));
-        }
+        Object[] args = new Object[params.length];
         args[0] = event;
+
+        for (int i = 1; i < args.length; i++) {
+            Parameter param = params[i];
+            CommandOption a = param.getAnnotation(CommandOption.class);
+            OptionMapping mapping = options.stream()
+                    .filter(o -> o.getName().equals(a.name()))
+                    .findFirst()
+                    .orElse(null);
+            args[i] = Commands.castOptionAsType(param.getType(), mapping);
+        }
 
         try {
             method.invoke(null, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
+            Logger.getLogger("DEBUG").log(Level.SEVERE, "Exception when invoking command.", e);
         }
     }
 
     static Object castOptionAsType(Class<?> type, OptionMapping option) {
-        if (type == Boolean.class | type == boolean.class) {
+        if (option == null) {
+            return null;
+        } else if (type == Boolean.class | type == boolean.class) {
             return option.getAsBoolean();
         } else if (type == Integer.class | type == int.class) {
             return (int) option.getAsLong();
@@ -65,7 +76,8 @@ public final class Commands {
             return option.getAsMentionable();
         } else if (type == String.class) {
             return option.getAsString();
-        } else {throw new IllegalArgumentException("Parameter of type %s is unsupported.".formatted(type.toGenericString()));
+        } else {
+            throw new IllegalArgumentException("Parameter of type %s is unsupported.".formatted(type.toGenericString()));
         }
     }
 
@@ -105,7 +117,10 @@ public final class Commands {
             return OptionType.MENTIONABLE;
         } else if (type == String.class) {
             return OptionType.STRING;
-        } else {
+        } else if (type.isEnum()) {
+            return OptionType.STRING;
+        }
+        else {
             throw new IllegalArgumentException("Parameter of type %s is unsupported.".formatted(type.toGenericString()));
         }
     }
@@ -148,12 +163,12 @@ class ClassCommand extends ListenerAdapter {
 
                     // subcommand has no group
                     if (a.group().isEmpty()) {
-                        subcommandGroups.get(a.group()).addSubcommand(new MethodSubcommand(m));
+                        subcommands.put(a.name(), new MethodSubcommand(m));
                     }
 
                     // subcommand has a group
                     else {
-                        subcommands.put(a.name(), new MethodSubcommand(m));
+                        subcommandGroups.get(a.group()).addSubcommand(new MethodSubcommand(m));
                     }
                 });
 
@@ -195,6 +210,7 @@ class ClassCommand extends ListenerAdapter {
             Command a = m.getAnnotation(Command.class);
             CommandData data = new CommandData(a.name(), a.description());
             data.addOptions(Commands.getOptionData(m));
+            data.setDefaultEnabled(a.permission());
             result.add(data);
         }
 
@@ -206,10 +222,12 @@ class ClassCommand extends ListenerAdapter {
         // process the root command
         CommandData rootData = new CommandData(this.rootCommandName, this.rootCommandDescription);
         for (MethodSubcommandGroup g : subcommandGroups.values()) {
-            rootData.addSubcommandGroups(g.compile());
+            SubcommandGroupData data = g.compile();
+            rootData.addSubcommandGroups(data);
         }
         for (MethodSubcommand c : subcommands.values()) {
-            rootData.addSubcommands(c.compile());
+            SubcommandData data = c.compile();
+            rootData.addSubcommands(data);
         }
         result.add(rootData);
 

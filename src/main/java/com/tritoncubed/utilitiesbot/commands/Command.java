@@ -7,4 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Command {
     String name();
     String description();
+    boolean permission() default true;
 }

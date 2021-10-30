@@ -24,7 +24,8 @@ public class Main {
         final JDA jda = JDABuilder.createLight(TOKEN, GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .build();
 
-        Commands.registerCommands(AWSCommands.class, jda);
         jda.awaitReady();
+
+        Commands.registerCommands(AWSCommands.class, jda);
     }
 }
