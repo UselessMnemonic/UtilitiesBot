@@ -19,6 +19,26 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Discord Command Tree
+ * (1) Command
+ *
+ * (2) Command [name = dothis]
+ *     |_ Subcommand [name = doelse]   /dothis doelse
+ *     |_ Subcommand
+ *     |_...
+ *
+ * (3) Command [name = command]
+ *     |_ SubcommandGroups [name = group]
+ *     |  |_ Subcommand [name = dothis]      /command group dothis
+ *     |  |_ ...
+ *     |_ SubcommandGroup
+ *        |_ ...
+ *
+ *  (4) Command
+ *      (with groups and subcommands)
+ */
+
 public final class Commands {
     public static void registerCommands(Class<? extends ApplicationCommand> commandClass, JDA jda) {
         ClassCommand commandImpl = new ClassCommand(commandClass);
@@ -134,7 +154,6 @@ class ClassCommand extends ListenerAdapter {
     private final HashMap<String, Method> commands = new HashMap<>();
 
     public ClassCommand(Class<? extends ApplicationCommand> clazz) {
-
         // Get root command name
         Command rootCommandAnnotation = clazz.getAnnotation(Command.class);
         if (rootCommandAnnotation == null) {
@@ -235,6 +254,9 @@ class ClassCommand extends ListenerAdapter {
     }
 }
 
+/**
+ * Class that represents subcommand
+ */
 class MethodSubcommand {
     public final String name, description;
     public final Method method;
@@ -253,6 +275,9 @@ class MethodSubcommand {
     }
 }
 
+/**
+ * Class that represents subcommand group
+ */
 class MethodSubcommandGroup {
     public final String name, description;
     private final HashMap<String, MethodSubcommand> subcommands = new HashMap<>();

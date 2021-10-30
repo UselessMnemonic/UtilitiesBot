@@ -17,15 +17,17 @@ public class Main {
 
     public static void main(String[] args) throws IOException, LoginException, InterruptedException {
 
+        // loads environment variables
         final Properties ENV = new Properties();
         ENV.load(new FileInputStream(ENV_FILE_PATH));
         final String TOKEN = ENV.getProperty(PROP_TOKEN);
 
+        // log in to discord
         final JDA jda = JDABuilder.createLight(TOKEN, GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .build();
-
         jda.awaitReady();
 
+        // register all commands
         Commands.registerCommands(AWSCommands.class, jda);
     }
 }

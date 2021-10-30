@@ -21,5 +21,4 @@ public class AWSCommands implements ApplicationCommand {
     ){
         event.reply("Thank you: %s!".formatted(instance)).setEphemeral(event.isFromGuild()).queue();
     }
-
 }
